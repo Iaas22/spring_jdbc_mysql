@@ -1,32 +1,32 @@
-package model;
+package com.ra2.mysql.model;
 
 import java.time.LocalDateTime;
 
 public class Customer {
 
-    private int id; // identificador únic, automàtic
-    private String name; // nom del client
-    private String description; // descripció del client
-    private int age; // edat
-    private String course; // curs
-    private LocalDateTime dataCreated; // data de creació
-    private LocalDateTime dataUpdated; // data d'actualització
+    private int id; // identificador único, automático
+    private String nombre; // nombre del cliente (antes "name")
+    private String descr; // descripción del cliente (antes "description")
+    private int age; // edad
+    private String course; // curso
+    private LocalDateTime dataCreated; // fecha de creación
+    private LocalDateTime dataUpdated; // fecha de actualización
 
     public Customer() {
         this.dataCreated = LocalDateTime.now();
         this.dataUpdated = LocalDateTime.now();
     }
 
-    public Customer(String name, String description, int age, String course) {
-        this.name = name;
-        this.description = description;
+    public Customer(String nombre, String descr, int age, String course) {
+        this.nombre = nombre;
+        this.descr = descr;
         this.age = age;
         this.course = course;
         this.dataCreated = LocalDateTime.now();
         this.dataUpdated = LocalDateTime.now();
     }
 
-    // Getters i Setters
+    // Getters y Setters
 
     public int getId() {
         return id;
@@ -36,21 +36,21 @@ public class Customer {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
         this.dataUpdated = LocalDateTime.now();
     }
 
-    public String getDescription() {
-        return description;
+    public String getDescr() {
+        return descr;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescr(String descr) {
+        this.descr = descr;
         this.dataUpdated = LocalDateTime.now();
     }
 
@@ -92,8 +92,8 @@ public class Customer {
     public String toString() {
         return "Customer{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
+                ", nombre='" + nombre + '\'' +
+                ", descr='" + descr + '\'' +
                 ", age=" + age +
                 ", course='" + course + '\'' +
                 ", dataCreated=" + dataCreated +
@@ -101,5 +101,3 @@ public class Customer {
                 '}';
     }
 }
-
-
