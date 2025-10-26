@@ -106,7 +106,7 @@ public String updateCustomer(int id, Customer customer) {
                     customer.getDescr(),
                     customer.getAge(),
                     customer.getCourse(),
-                    new java.sql.Timestamp(System.currentTimeMillis()), // dataUpdated a la data actual
+                    new java.sql.Timestamp(System.currentTimeMillis()), 
                     id
             );
 
@@ -114,7 +114,6 @@ public String updateCustomer(int id, Customer customer) {
                 return "No s'ha trobat cap customer amb ID: " + id;
             }
 
-            // Retorna el customer actualitzat
             return getCustomerById(id);
 
         } catch (Exception e) {

@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 
 public class Customer {
 
-    private int id; // identificador único, automático
-    private String nombre; // nombre del cliente (antes "name")
-    private String descr; // descripción del cliente (antes "description")
-    private int age; // edad
-    private String course; // curso
-    private LocalDateTime dataCreated; // fecha de creación
-    private LocalDateTime dataUpdated; // fecha de actualización
+    private int id; 
+    private String nombre;
+    private String descr; 
+    private int age; 
+    private String course; 
+    private LocalDateTime dataCreated; 
+    private LocalDateTime dataUpdated; 
 
     public Customer() {
         this.dataCreated = LocalDateTime.now();
@@ -26,7 +26,6 @@ public class Customer {
         this.dataUpdated = LocalDateTime.now();
     }
 
-    // Getters y Setters
 
     public int getId() {
         return id;
