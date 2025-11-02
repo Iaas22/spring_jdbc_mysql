@@ -24,7 +24,7 @@ public class CustomerRepository {
         String sql = "INSERT INTO customers (nombre, descr, age, course, password, dataCreated, dataUpdated) VALUES (?,?,?,?,?,?,?)";
         LocalDateTime now = LocalDateTime.now();
 
-        // Datos base automáticos
+       
         String[] names = {"AAA", "BBB", "CCC", "DDD", "EEE", "FFF", "GGG", "HHH", "III", "JJJ"};
         String[] description = {
             "Estudiante de matemáticas",
@@ -41,7 +41,7 @@ public class CustomerRepository {
         int[] ages = {20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
         String[] courses = {"Mates", "Fisica", "Quimica", "Bio", "Mates", "Fisica", "Catalán", "Bio", "Quimica", "Fisica"};
 
-        // Inserta 10 registros con datos generados + password del request
+        // Inserta 10 registros
         for (int i = 0; i < 10; i++) {
             jdbcTemplate.update(
                 sql,
@@ -59,6 +59,7 @@ public class CustomerRepository {
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
+    //obtiene todos los customers que hay en la tabla
    public ResponseEntity<List<Customer>> getAllCustomers() {
     try {
         String sql = "SELECT * FROM customers";
@@ -77,7 +78,6 @@ public class CustomerRepository {
         });
 
         if (customers.isEmpty()) {
-            // Retorna null en el body, sin error
             return ResponseEntity.ok().body(null);
         }
 
@@ -89,6 +89,7 @@ public class CustomerRepository {
     }
 }
 
+    //obtiene un customer por su id
     public ResponseEntity<Customer> getCustomerById(int id) {
     try {
         String sql = "SELECT * FROM customers WHERE id = ?";
@@ -101,9 +102,8 @@ public class CustomerRepository {
         Map<String, Object> data = result.get(0);
         Customer customer = new Customer();
 
-        // Conversión a int 
+        //mapea los campos
         customer.setId(((Number) data.get("id")).intValue());
-
         customer.setNombre((String) data.get("nombre"));
         customer.setDescr((String) data.get("descr"));
         customer.setAge((Integer) data.get("age"));
@@ -128,7 +128,8 @@ public class CustomerRepository {
     }
 }
 
-public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
+    //actualiza todos los datos de un customer por su id
+    public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
     try {
         String sql = """
             UPDATE customers 
@@ -150,6 +151,7 @@ public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
             return ResponseEntity.status(404).body(null);
         }
 
+        //devuelve customer actualizadp
         ResponseEntity<Customer> response = getCustomerById(id);
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             return ResponseEntity.ok(response.getBody());
@@ -163,7 +165,7 @@ public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
     }
 }
 
-
+    //actualiza solo la edad de un customer
     public Customer updateCustomerPartial(int id, Integer age) {
     String sql = "UPDATE customers SET age = ?, dataUpdated = ? WHERE id = ?";
     int rows = jdbcTemplate.update(sql, age, new java.sql.Timestamp(System.currentTimeMillis()), id);
@@ -175,7 +177,9 @@ public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
     String selectSql = "SELECT * FROM customers WHERE id = ?";
     return jdbcTemplate.queryForObject(selectSql, new BeanPropertyRowMapper<>(Customer.class), id);
 }
-public String deleteCustomer(int id) {
+
+    //elimina un customer por su id
+    public String deleteCustomer(int id) {
     try {
         String sql = "DELETE FROM customers WHERE id = ?";
         int rows = jdbcTemplate.update(sql, id);
