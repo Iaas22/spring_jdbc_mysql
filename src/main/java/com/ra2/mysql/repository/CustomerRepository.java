@@ -57,45 +57,36 @@ public class CustomerRepository {
         String message = "Se han insertado correctamente 10 customers en la base de datos.";
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
-    
+
    public ResponseEntity<List<Customer>> getAllCustomers() {
-        try {
-            String sql = "SELECT * FROM customers";
-            List<Map<String, Object>> customers = jdbcTemplate.queryForList(sql);
+    try {
+        String sql = "SELECT * FROM customers";
 
-            if (customers.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
+        List<Customer> customers = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Customer c = new Customer();
+            c.setId(rs.getInt("id"));
+            c.setNombre(rs.getString("nombre"));
+            c.setDescr(rs.getString("descr"));
+            c.setAge(rs.getInt("age"));
+            c.setCourse(rs.getString("course"));
+            c.setPassword(rs.getString("password"));
+            c.setDataCreated(rs.getTimestamp("dataCreated") != null ? rs.getTimestamp("dataCreated").toLocalDateTime() : null);
+            c.setDataUpdated(rs.getTimestamp("dataUpdated") != null ? rs.getTimestamp("dataUpdated").toLocalDateTime() : null);
+            return c;
+        });
 
-            StringBuilder result = new StringBuilder("Lista de clientes:\n\n");
-            for (Map<String, Object> customer : customers) {
-                result.append("ID: ").append(customer.get("id")).append("\n");
-                result.append("Nombre: ").append(customer.get("nombre")).append("\n");
-                result.append("Descripción: ").append(customer.get("descr")).append("\n");
-                result.append("Edad: ").append(customer.get("age")).append("\n");
-                result.append("Curso: ").append(customer.get("course")).append("\n");
-                result.append("Fecha creación: ").append(customer.get("dataCreated")).append("\n");
-                result.append("Fecha actualización: ").append(customer.get("dataUpdated")).append("\n\n");
-            }
-
-            List<Customer> customerList = new ArrayList<>();
-            for (Map<String, Object> customer : customers) {
-                Customer customerObj = new Customer();
-                customerObj.setId((Integer) customer.get("id"));
-                customerObj.setNombre((String) customer.get("nombre"));
-                customerObj.setDescr((String) customer.get("descr"));
-                customerObj.setAge((Integer) customer.get("age"));
-                customerObj.setCourse((String) customer.get("course"));
-                customerObj.setDataCreated((LocalDateTime) customer.get("dataCreated"));
-                customerObj.setDataUpdated((LocalDateTime) customer.get("dataUpdated"));
-                customerList.add(customerObj);
-            }
-            return ResponseEntity.ok().body(customerList);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
+        if (customers.isEmpty()) {
+            // Retorna null en el body, sin error
+            return ResponseEntity.ok().body(null);
         }
+
+        return ResponseEntity.ok(customers);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body(null);
     }
+}
 
     public ResponseEntity<Customer> getCustomerById(int id) {
     try {
