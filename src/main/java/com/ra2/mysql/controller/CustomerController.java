@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ra2.mysql.model.Customer;
@@ -47,13 +48,20 @@ public class CustomerController {
         return customerRepository.updateCustomer(customer_id, customer);
     }
 
-    @PatchMapping("/api/customer/{customer_id}")
-    public String updateCustomerParcial(@PathVariable int id, @RequestBody Map<String, Object> updates){
-          Integer age = (Integer) updates.get("age");
-        
-    
-          return customerRepository.updateCustomerPartial(id, age);
+   @PatchMapping("/api/customer/{customer_id}/age")
+    public ResponseEntity<Customer> updateCustomerAge(
+        @PathVariable("customer_id") int customerId,
+        @RequestParam("age") int age) {
+
+    Customer updatedCustomer = customerRepository.updateCustomerPartial(customerId, age);
+
+    if (updatedCustomer == null) {
+        return ResponseEntity.notFound().build();
     }
+
+    return ResponseEntity.ok(updatedCustomer);
+}
+
 
     @DeleteMapping("/api/customer/{id}")
     public String deleteCustomer(@PathVariable int id){

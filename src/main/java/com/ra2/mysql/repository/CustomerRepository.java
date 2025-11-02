@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -163,38 +164,18 @@ public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
 }
 
 
-    public String updateCustomerPartial(int id, Integer age) {
-    try {
-        String sql = "UPDATE customers SET ";
+    public Customer updateCustomerPartial(int id, Integer age) {
+    String sql = "UPDATE customers SET age = ?, dataUpdated = ? WHERE id = ?";
+    int rows = jdbcTemplate.update(sql, age, new java.sql.Timestamp(System.currentTimeMillis()), id);
 
-        List<Object> params = new ArrayList<>();
-       
-        if (age != null) {
-            sql += "age = ?, ";
-            params.add(age);
-        }
-
-        sql += "dataUpdated = ? WHERE id = ?";
-        params.add(new java.sql.Timestamp(System.currentTimeMillis()));
-        params.add(id);
-
-        int rows = jdbcTemplate.update(sql, params.toArray());
-
-        if (rows == 0) {
-            return "No se encontró ningún customer con ID: " + id;
-        }
-
-        ResponseEntity<Customer> response = getCustomerById(id);
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return "Customer actualizado: " + response.getBody().toString();
-        } else {
-            return "Error obteniendo el customer actualizado con ID: " + id;
-        }
-
-    } catch (Exception e) {
-        return "Error actualizando el customer con ID " + id + ": " + e.getMessage();
+    if (rows == 0) {
+        return null;
     }
+
+    String selectSql = "SELECT * FROM customers WHERE id = ?";
+    return jdbcTemplate.queryForObject(selectSql, new BeanPropertyRowMapper<>(Customer.class), id);
 }
+
 public String deleteCustomer(int id) {
     try {
         String sql = "DELETE FROM customers WHERE id = ?";
