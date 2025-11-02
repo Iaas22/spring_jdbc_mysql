@@ -175,7 +175,6 @@ public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
     String selectSql = "SELECT * FROM customers WHERE id = ?";
     return jdbcTemplate.queryForObject(selectSql, new BeanPropertyRowMapper<>(Customer.class), id);
 }
-
 public String deleteCustomer(int id) {
     try {
         String sql = "DELETE FROM customers WHERE id = ?";

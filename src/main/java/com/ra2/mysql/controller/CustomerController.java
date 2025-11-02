@@ -63,10 +63,11 @@ public class CustomerController {
 }
 
 
-    @DeleteMapping("/api/customer/{id}")
-    public String deleteCustomer(@PathVariable int id){
-        return customerRepository.deleteCustomer(id);
-    }
+    @DeleteMapping("/api/customer/{customer_id}")
+    public String deleteCustomer(@PathVariable("customer_id") int customerId) {
+    return customerRepository.deleteCustomer(customerId);
+}
+
 
     }
 
