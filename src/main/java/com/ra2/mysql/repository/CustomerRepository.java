@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -17,10 +19,11 @@ public class CustomerRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public String createCustomers() {
-        String sql = "INSERT INTO customers (nombre, descr, age, course, dataCreated, dataUpdated) VALUES (?,?,?,?,?,?)";
+     public ResponseEntity<String> createCustomers(Customer customer) {
+        String sql = "INSERT INTO customers (nombre, descr, age, course, password, dataCreated, dataUpdated) VALUES (?,?,?,?,?,?,?)";
         LocalDateTime now = LocalDateTime.now();
 
+        // Datos base automáticos
         String[] names = {"AAA", "BBB", "CCC", "DDD", "EEE", "FFF", "GGG", "HHH", "III", "JJJ"};
         String[] description = {
             "Estudiante de matemáticas",
@@ -35,21 +38,33 @@ public class CustomerRepository {
             "Estudiante de filosofía"
         };
         int[] ages = {20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
-        String[] courses = {"Mates", "Fisica", "Quimica", "Bio", "Mates", "Fisica", "Ctalán", "Bio", "Quimica", "Fisica"};
+        String[] courses = {"Mates", "Fisica", "Quimica", "Bio", "Mates", "Fisica", "Catalán", "Bio", "Quimica", "Fisica"};
 
+        // Inserta 10 registros con datos generados + password del request
         for (int i = 0; i < 10; i++) {
-            jdbcTemplate.update(sql, names[i], description[i], ages[i], courses[i], now, now);
+            jdbcTemplate.update(
+                sql,
+                names[i],
+                description[i],
+                ages[i],
+                courses[i],
+                customer.getPassword() != null ? customer.getPassword() : "default123",
+                now,
+                now
+            );
         }
-        return "Se han insertado correctamente 10 clientes.";
-    }
 
-   public String getAllCustomers() {
+        String message = "Se han insertado correctamente 10 customers en la base de datos.";
+        return ResponseEntity.status(HttpStatus.CREATED).body(message);
+    }
+    
+   public ResponseEntity<List<Customer>> getAllCustomers() {
         try {
             String sql = "SELECT * FROM customers";
             List<Map<String, Object>> customers = jdbcTemplate.queryForList(sql);
 
             if (customers.isEmpty()) {
-                return "No hay clientes en la base de datos.";
+                return ResponseEntity.noContent().build();
             }
 
             StringBuilder result = new StringBuilder("Lista de clientes:\n\n");
@@ -63,20 +78,32 @@ public class CustomerRepository {
                 result.append("Fecha actualización: ").append(customer.get("dataUpdated")).append("\n\n");
             }
 
-            return result.toString();
+            List<Customer> customerList = new ArrayList<>();
+            for (Map<String, Object> customer : customers) {
+                Customer customerObj = new Customer();
+                customerObj.setId((Integer) customer.get("id"));
+                customerObj.setNombre((String) customer.get("nombre"));
+                customerObj.setDescr((String) customer.get("descr"));
+                customerObj.setAge((Integer) customer.get("age"));
+                customerObj.setCourse((String) customer.get("course"));
+                customerObj.setDataCreated((LocalDateTime) customer.get("dataCreated"));
+                customerObj.setDataUpdated((LocalDateTime) customer.get("dataUpdated"));
+                customerList.add(customerObj);
+            }
+            return ResponseEntity.ok().body(customerList);
 
         } catch (Exception e) {
-            return "Error al obtener los clientes: " + e.getMessage();
+            return ResponseEntity.status(500).body(null);
         }
     }
 
-    public String getCustomerById(int id) {
+    public ResponseEntity<Customer> getCustomerById(int id) {
     try {
         String sql = "SELECT * FROM customers WHERE id = ?";
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, id);
 
         if (result.isEmpty()) {
-            return "No se encontró ningún cliente con el ID: " + id;
+            return ResponseEntity.status(404).body(null);
         }
 
         Map<String, Object> customer = result.get(0);
@@ -90,14 +117,23 @@ public class CustomerRepository {
         sb.append("Fecha creación: ").append(customer.get("dataCreated")).append("\n");
         sb.append("Fecha actualización: ").append(customer.get("dataUpdated")).append("\n");
 
-        return sb.toString();
+        Customer customerObj = new Customer();
+        customerObj.setId((Integer) customer.get("id"));
+        customerObj.setNombre((String) customer.get("nombre"));
+        customerObj.setDescr((String) customer.get("descr"));
+        customerObj.setAge((Integer) customer.get("age"));
+        customerObj.setCourse((String) customer.get("course"));
+        customerObj.setDataCreated((LocalDateTime) customer.get("dataCreated"));
+        customerObj.setDataUpdated((LocalDateTime) customer.get("dataUpdated"));
+
+        return ResponseEntity.ok(customerObj);
 
     } catch (Exception e) {
-        return "Error al obtener el cliente con ID " + id + ": " + e.getMessage();
+        return ResponseEntity.status(500).body(null);
     }
 }
 
-public String updateCustomer(int id, Customer customer) {
+public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
         try {
             String sql = "UPDATE customers SET nombre = ?, descr = ?, age = ?, course = ?, dataUpdated = ? WHERE id = ?";
             
@@ -111,25 +147,27 @@ public String updateCustomer(int id, Customer customer) {
             );
 
             if (rows == 0) {
-                return "No s'ha trobat cap customer amb ID: " + id;
+                return ResponseEntity.status(404).body(null);
             }
 
-            return getCustomerById(id);
+            ResponseEntity<Customer> response = getCustomerById(id);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return ResponseEntity.ok(response.getBody());
+            } else {
+                return ResponseEntity.status(500).body(null);
+            }
 
         } catch (Exception e) {
-            return "Error actualitzant el customer amb ID " + id + ": " + e.getMessage();
+            return ResponseEntity.status(500).body(null);
         }
     }
 
-    public String updateCustomerPartial(int id, String nombre, Integer age) {
+    public String updateCustomerPartial(int id, Integer age) {
     try {
         String sql = "UPDATE customers SET ";
 
         List<Object> params = new ArrayList<>();
-        if (nombre != null) {
-            sql += "nombre = ?, ";
-            params.add(nombre);
-        }
+       
         if (age != null) {
             sql += "age = ?, ";
             params.add(age);
@@ -145,7 +183,12 @@ public String updateCustomer(int id, Customer customer) {
             return "No se encontró ningún customer con ID: " + id;
         }
 
-        return getCustomerById(id);
+        ResponseEntity<Customer> response = getCustomerById(id);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return "Customer actualizado: " + response.getBody().toString();
+        } else {
+            return "Error obteniendo el customer actualizado con ID: " + id;
+        }
 
     } catch (Exception e) {
         return "Error actualizando el customer con ID " + id + ": " + e.getMessage();

@@ -1,8 +1,11 @@
 package com.ra2.mysql.controller;
 
 
+import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.connector.Response;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,33 +28,31 @@ public class CustomerController {
     }
 
     @PostMapping("/api/customer")
-    public String addCustomers() {
-        return customerRepository.createCustomers();
+    public ResponseEntity<String> addCustomers(@RequestBody Customer customer) {
+        return customerRepository.createCustomers(customer);
     }
 
     @GetMapping ("/api/customer")
-    public String getAllCustomers(){
+    public ResponseEntity<List<Customer>> getAllCustomers(){
         return customerRepository.getAllCustomers();
     }
    
-    @GetMapping("/api/customer/{id}")
-    public String getCustomerById(@PathVariable int id){
-        return customerRepository.getCustomerById(id);
+    @GetMapping("/api/customer/{customer_id}")
+    public ResponseEntity<Customer> getCustomerById(@PathVariable int customer_id){
+        return customerRepository.getCustomerById(customer_id);
     }
 
-    @PutMapping("/api/customer/{id}")
-    public String updateCustomer (@PathVariable int id, @RequestBody Customer customer){
-        return customerRepository.updateCustomer(id, customer);
+    @PutMapping("/api/customer/{customer_id}")
+    public ResponseEntity<Customer> updateCustomer (@PathVariable int customer_id, @RequestBody Customer customer){
+        return customerRepository.updateCustomer(customer_id, customer);
 
     }
-    @PatchMapping("/api/customer/{id}")
+    @PatchMapping("/api/customer/{customer_id}")
     public String updateCustomerParcial(@PathVariable int id, @RequestBody Map<String, Object> updates){
           Integer age = (Integer) updates.get("age");
         
-          String nombre = (String) updates.get("nombre");
-
     
-          return customerRepository.updateCustomerPartial(id, nombre, age);
+          return customerRepository.updateCustomerPartial(id, age);
     }
 
     @DeleteMapping("/api/customer/{id}")

@@ -9,6 +9,7 @@ public class Customer {
     private String descr; 
     private int age; 
     private String course; 
+    private String password; 
     private LocalDateTime dataCreated; 
     private LocalDateTime dataUpdated; 
 
@@ -17,15 +18,15 @@ public class Customer {
         this.dataUpdated = LocalDateTime.now();
     }
 
-    public Customer(String nombre, String descr, int age, String course) {
+    public Customer(String nombre, String descr, int age, String course, String password) {
         this.nombre = nombre;
         this.descr = descr;
         this.age = age;
         this.course = course;
+        this.password = password;
         this.dataCreated = LocalDateTime.now();
         this.dataUpdated = LocalDateTime.now();
     }
-
 
     public int getId() {
         return id;
@@ -71,6 +72,15 @@ public class Customer {
         this.dataUpdated = LocalDateTime.now();
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+        this.dataUpdated = LocalDateTime.now();
+    }
+
     public LocalDateTime getDataCreated() {
         return dataCreated;
     }
@@ -95,6 +105,7 @@ public class Customer {
                 ", descr='" + descr + '\'' +
                 ", age=" + age +
                 ", course='" + course + '\'' +
+                ", password='" + password + '\'' +
                 ", dataCreated=" + dataCreated +
                 ", dataUpdated=" + dataUpdated +
                 '}';
