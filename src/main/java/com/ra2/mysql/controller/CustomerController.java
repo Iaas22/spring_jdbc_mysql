@@ -38,15 +38,15 @@ public class CustomerController {
     }
    
     @GetMapping("/api/customer/{customer_id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable int customer_id){
+    public ResponseEntity<Customer> getCustomerById(@PathVariable("customer_id") int customer_id) {
         return customerRepository.getCustomerById(customer_id);
     }
 
     @PutMapping("/api/customer/{customer_id}")
     public ResponseEntity<Customer> updateCustomer (@PathVariable int customer_id, @RequestBody Customer customer){
         return customerRepository.updateCustomer(customer_id, customer);
-
     }
+
     @PatchMapping("/api/customer/{customer_id}")
     public String updateCustomerParcial(@PathVariable int id, @RequestBody Map<String, Object> updates){
           Integer age = (Integer) updates.get("age");

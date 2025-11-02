@@ -97,29 +97,32 @@ public class CustomerRepository {
             return ResponseEntity.status(404).body(null);
         }
 
-        Map<String, Object> customer = result.get(0);
+        Map<String, Object> data = result.get(0);
+        Customer customer = new Customer();
 
-        StringBuilder sb = new StringBuilder("Datos del cliente:\n\n");
-        sb.append("ID: ").append(customer.get("id")).append("\n");
-        sb.append("Nombre: ").append(customer.get("nombre")).append("\n");
-        sb.append("Descripción: ").append(customer.get("descr")).append("\n");
-        sb.append("Edad: ").append(customer.get("age")).append("\n");
-        sb.append("Curso: ").append(customer.get("course")).append("\n");
-        sb.append("Fecha creación: ").append(customer.get("dataCreated")).append("\n");
-        sb.append("Fecha actualización: ").append(customer.get("dataUpdated")).append("\n");
+        // Conversión a int 
+        customer.setId(((Number) data.get("id")).intValue());
 
-        Customer customerObj = new Customer();
-        customerObj.setId((Integer) customer.get("id"));
-        customerObj.setNombre((String) customer.get("nombre"));
-        customerObj.setDescr((String) customer.get("descr"));
-        customerObj.setAge((Integer) customer.get("age"));
-        customerObj.setCourse((String) customer.get("course"));
-        customerObj.setDataCreated((LocalDateTime) customer.get("dataCreated"));
-        customerObj.setDataUpdated((LocalDateTime) customer.get("dataUpdated"));
+        customer.setNombre((String) data.get("nombre"));
+        customer.setDescr((String) data.get("descr"));
+        customer.setAge((Integer) data.get("age"));
+        customer.setCourse((String) data.get("course"));
+        customer.setPassword((String) data.get("password"));
 
-        return ResponseEntity.ok(customerObj);
+        Object created = data.get("dataCreated");
+        Object updated = data.get("dataUpdated");
+
+        if (created instanceof java.sql.Timestamp) {
+            customer.setDataCreated(((java.sql.Timestamp) created).toLocalDateTime());
+        }
+        if (updated instanceof java.sql.Timestamp) {
+            customer.setDataUpdated(((java.sql.Timestamp) updated).toLocalDateTime());
+        }
+
+        return ResponseEntity.ok(customer);
 
     } catch (Exception e) {
+        e.printStackTrace();
         return ResponseEntity.status(500).body(null);
     }
 }
