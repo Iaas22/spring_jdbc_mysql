@@ -128,33 +128,40 @@ public class CustomerRepository {
 }
 
 public ResponseEntity<Customer> updateCustomer(int id, Customer customer) {
-        try {
-            String sql = "UPDATE customers SET nombre = ?, descr = ?, age = ?, course = ?, dataUpdated = ? WHERE id = ?";
-            
-            int rows = jdbcTemplate.update(sql,
-                    customer.getNombre(),
-                    customer.getDescr(),
-                    customer.getAge(),
-                    customer.getCourse(),
-                    new java.sql.Timestamp(System.currentTimeMillis()), 
-                    id
-            );
+    try {
+        String sql = """
+            UPDATE customers 
+            SET nombre = ?, descr = ?, age = ?, course = ?, password = ?, dataUpdated = ? 
+            WHERE id = ?
+        """;
 
-            if (rows == 0) {
-                return ResponseEntity.status(404).body(null);
-            }
+        int rows = jdbcTemplate.update(sql,
+                customer.getNombre(),
+                customer.getDescr(),
+                customer.getAge(),
+                customer.getCourse(),
+                customer.getPassword(), 
+                new java.sql.Timestamp(System.currentTimeMillis()),
+                id
+        );
 
-            ResponseEntity<Customer> response = getCustomerById(id);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return ResponseEntity.ok(response.getBody());
-            } else {
-                return ResponseEntity.status(500).body(null);
-            }
+        if (rows == 0) {
+            return ResponseEntity.status(404).body(null);
+        }
 
-        } catch (Exception e) {
+        ResponseEntity<Customer> response = getCustomerById(id);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return ResponseEntity.ok(response.getBody());
+        } else {
             return ResponseEntity.status(500).body(null);
         }
+
+    } catch (Exception e) {
+        System.err.println("Error actualitzant el client: " + e.getMessage());
+        return ResponseEntity.status(500).body(null);
     }
+}
+
 
     public String updateCustomerPartial(int id, Integer age) {
     try {
