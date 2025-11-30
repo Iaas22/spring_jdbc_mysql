@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS customers;
-
 CREATE TABLE customers (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255),
@@ -7,6 +5,7 @@ CREATE TABLE customers (
     age INT,
     course VARCHAR(255),
     password VARCHAR(255),
-    dataCreated DATETIME,
-    dataUpdated DATETIME
+    dataCreated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    dataUpdated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    image_path VARCHAR(500) NULL
 );

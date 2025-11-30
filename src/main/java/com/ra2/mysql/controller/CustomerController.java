@@ -1,8 +1,8 @@
 package com.ra2.mysql.controller;
 
-
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,65 +12,67 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.ra2.mysql.Services.CustomerService;
 import com.ra2.mysql.model.Customer;
-import com.ra2.mysql.repository.CustomerRepository;
 
 @RestController
+@RequestMapping("/api/customer")
 public class CustomerController {
 
-    private final CustomerRepository customerRepository;
+    @Autowired
+    private CustomerService service;
 
-    public CustomerController(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
+    
+
+    //obtener todos
+    @GetMapping
+    public ResponseEntity<List<Customer>> getAll() {
+        return ResponseEntity.ok(service.getAllCustomers());
     }
 
-    //crear 10 customers
-    @PostMapping("/api/customer")
-    public ResponseEntity<String> addCustomers(@RequestBody Customer customer) {
-        return customerRepository.createCustomers(customer);
+    //obtener por id
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> getById(@PathVariable int id) {
+        return ResponseEntity.ok(service.getCustomerById(id));
     }
 
-    //obtener todos los customers
-    @GetMapping ("/api/customer")
-    public ResponseEntity<List<Customer>> getAllCustomers(){
-        return customerRepository.getAllCustomers();
-    }
-   
-    //obtener un customer por su id
-    @GetMapping("/api/customer/{customer_id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable("customer_id") int customer_id) {
-        return customerRepository.getCustomerById(customer_id);
+    //update entero
+    @PutMapping("/{id}")
+    public ResponseEntity<Customer> updateFull(
+            @PathVariable int id,
+            @RequestBody Customer c) {
+        return ResponseEntity.ok(service.updateCustomer(id, c));
     }
 
-    //update d eun customer con todos sus datos
-    @PutMapping("/api/customer/{customer_id}")
-    public ResponseEntity<Customer> updateCustomer (@PathVariable int customer_id, @RequestBody Customer customer){
-        return customerRepository.updateCustomer(customer_id, customer);
+    //update solo una cosa
+    @PatchMapping("/{id}/age")
+    public ResponseEntity<Customer> updateAge(
+            @PathVariable int id,
+            @RequestParam int age) {
+        return ResponseEntity.ok(service.updateCustomerAge(id, age));
     }
 
-    //update de un customer solo edad
-   @PatchMapping("/api/customer/{customer_id}/age")
-    public ResponseEntity<Customer> updateCustomerAge(
-        @PathVariable("customer_id") int customerId,
-        @RequestParam("age") int age) {
-
-    Customer updatedCustomer = customerRepository.updateCustomerPartial(customerId, age);
-
-    if (updatedCustomer == null) {
-        return ResponseEntity.notFound().build();
+    //delete
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable int id) {
+        return ResponseEntity.ok(service.deleteCustomer(id));
     }
 
-    return ResponseEntity.ok(updatedCustomer);
+    //subir una imagen
+    @PostMapping("/users/{user_id}/image")
+    public ResponseEntity<String> uploadImage(
+        @PathVariable("user_id") Long userId,
+        @RequestParam("imageFile") MultipartFile imageFile) {
+
+    return service.uploadUserImage(userId, imageFile);
 }
 
-    //eliminar un customer por su id
-    @DeleteMapping("/api/customer/{customer_id}")
-    public String deleteCustomer(@PathVariable("customer_id") int customerId) {
-    return customerRepository.deleteCustomer(customerId);
+ 
+
+
+
 }
-
-
-    }
-
