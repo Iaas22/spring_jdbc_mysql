@@ -83,4 +83,17 @@ public class CustomerController {
         }
     }
 
+    //subir fichero json
+    @PostMapping("/upload-json")
+    public ResponseEntity<String> uploadJson(@RequestParam("jsonFile") MultipartFile jsonFile) {
+        try {
+            int totalAdded = service.processJsonFile(jsonFile);
+            return ResponseEntity.ok("Total de registros añadidos: " + totalAdded);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error procesando el archivo JSON: " + e.getMessage());
+        }
+    }
+
 }

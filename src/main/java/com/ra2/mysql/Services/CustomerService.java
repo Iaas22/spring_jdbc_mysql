@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ra2.mysql.model.Customer;
 import com.ra2.mysql.repository.CustomerRepository;
 
@@ -138,6 +140,43 @@ public class CustomerService {
         }
         Path targetPath = csvDir.resolve(csvFile.getOriginalFilename());
         Files.copy(csvFile.getInputStream(), targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+        return totalAdded;
+    }
+
+    public int processJsonFile(MultipartFile jsonFile) throws IOException {
+        if (jsonFile.isEmpty()) {
+            throw new IllegalArgumentException("El archivo JSON está vacío.");
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(jsonFile.getInputStream());
+        JsonNode usersNode = root.path("data").path("users");
+
+        if (!usersNode.isArray()) {
+            throw new IllegalArgumentException("El JSON no tiene el formato esperado.");
+        }
+
+        int totalAdded = 0;
+        for (JsonNode userNode : usersNode) {
+            Customer c = new Customer();
+            c.setNombre(userNode.path("name").asText());
+            c.setDescr(userNode.path("description").asText());
+            c.setCourse(userNode.path("course").asText());
+            c.setPassword(userNode.path("password").asText());
+            c.setAge(0);
+
+            validateCustomer(c);
+            repository.insert(c);
+            totalAdded++;
+        }
+
+        Path jsonDir = Paths.get("src/main/resources/json_processed");
+        if (!Files.exists(jsonDir)) {
+            Files.createDirectories(jsonDir);
+        }
+        Path targetPath = jsonDir.resolve(jsonFile.getOriginalFilename());
+        Files.copy(jsonFile.getInputStream(), targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
         return totalAdded;
     }
