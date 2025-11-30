@@ -22,8 +22,6 @@ public class CustomerService {
     @Autowired
     private CustomerRepository repository;
 
- 
-
     private void validateCustomer(Customer c) {
         if (c.getNombre() == null || c.getNombre().length() < 3) {
             throw new IllegalArgumentException("El nombre debe tener al menos 3 caracteres.");
@@ -38,7 +36,6 @@ public class CustomerService {
         return c;
     }
 
-
     public List<Customer> getAllCustomers() {
         return repository.findAll();
     }
@@ -46,7 +43,6 @@ public class CustomerService {
     public Customer getCustomerById(int id) {
         return ensureExists(id);
     }
-
 
     public Customer updateCustomer(int id, Customer newData) {
 
@@ -57,16 +53,12 @@ public class CustomerService {
         return repository.findById(id);
     }
 
-
-
     public Customer updateCustomerAge(int id, int age) {
 
         ensureExists(id);
         repository.updateAge(id, age);
         return repository.findById(id);
     }
-
- 
 
     public String deleteCustomer(int id) {
 
@@ -79,8 +71,8 @@ public class CustomerService {
 
         return "Customer eliminado correctamente.";
     }
-    
-      public ResponseEntity<String> uploadUserImage(Long userId, MultipartFile imageFile) {
+
+    public ResponseEntity<String> uploadUserImage(Long userId, MultipartFile imageFile) {
         Customer customer = repository.findById(userId.intValue());
         if (customer == null) {
             return ResponseEntity.status(404)
@@ -112,7 +104,42 @@ public class CustomerService {
             return ResponseEntity.status(500).body("Error al subir la imagen: " + e.getMessage());
         }
     }
-  
-  
+
+    public int processCsvFile(MultipartFile csvFile) throws IOException {
+        if (csvFile.isEmpty()) {
+            throw new IllegalArgumentException("El archivo CSV está vacío.");
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(csvFile.getInputStream()));
+        String line;
+        int totalAdded = 0;
+
+        while ((line = reader.readLine()) != null) {
+            String[] fields = line.split(",");
+            if (fields.length < 5) {
+                continue;
+            }
+
+            Customer c = new Customer();
+            c.setNombre(fields[0].trim());
+            c.setDescr(fields[1].trim());
+            c.setAge(Integer.parseInt(fields[2].trim()));
+            c.setCourse(fields[3].trim());
+            c.setPassword(fields[4].trim());
+
+            validateCustomer(c);
+            repository.insert(c);
+            totalAdded++;
+        }
+
+        Path csvDir = Paths.get("src/main/resources/csv_processed");
+        if (!Files.exists(csvDir)) {
+            Files.createDirectories(csvDir);
+        }
+        Path targetPath = csvDir.resolve(csvFile.getOriginalFilename());
+        Files.copy(csvFile.getInputStream(), targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+        return totalAdded;
+    }
 
 }

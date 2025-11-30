@@ -1,4 +1,5 @@
 package com.ra2.mysql.repository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +16,6 @@ public class CustomerRepository {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
 
     public List<Customer> findAll() {
         String sql = "SELECT * FROM customers";
@@ -35,13 +35,13 @@ public class CustomerRepository {
             WHERE id=?
         """;
         return jdbcTemplate.update(sql,
-            c.getNombre(),
-            c.getDescr(),
-            c.getAge(),
-            c.getCourse(),
-            c.getPassword(),
-            LocalDateTime.now(),
-            id
+                c.getNombre(),
+                c.getDescr(),
+                c.getAge(),
+                c.getCourse(),
+                c.getPassword(),
+                LocalDateTime.now(),
+                id
         );
     }
 
@@ -54,12 +54,24 @@ public class CustomerRepository {
         String sql = "DELETE FROM customers WHERE id=?";
         return jdbcTemplate.update(sql, id);
     }
-    
+
     public int updateImagePath(Long id, String imagePath) {
-    String sql = "UPDATE customers SET image_path = ?, dataUpdated = ? WHERE id = ?";
-    return jdbcTemplate.update(sql, imagePath, LocalDateTime.now(), id);
-}
+        String sql = "UPDATE customers SET image_path = ?, dataUpdated = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, imagePath, LocalDateTime.now(), id);
+    }
 
-
+    public int insert(Customer c) {
+        String sql = """
+        INSERT INTO customers(nombre, descr, age, course, password, dataCreated, dataUpdated)
+        VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+    """;
+        return jdbcTemplate.update(sql,
+                c.getNombre(),
+                c.getDescr(),
+                c.getAge(),
+                c.getCourse(),
+                c.getPassword()
+        );
+    }
 
 }

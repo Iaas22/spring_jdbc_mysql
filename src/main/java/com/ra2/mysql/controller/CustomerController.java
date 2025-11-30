@@ -1,5 +1,6 @@
 package com.ra2.mysql.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,6 @@ public class CustomerController {
 
     @Autowired
     private CustomerService service;
-
-    
 
     //obtener todos
     @GetMapping
@@ -65,14 +64,23 @@ public class CustomerController {
     //subir una imagen
     @PostMapping("/users/{user_id}/image")
     public ResponseEntity<String> uploadImage(
-        @PathVariable("user_id") Long userId,
-        @RequestParam("imageFile") MultipartFile imageFile) {
+            @PathVariable("user_id") Long userId,
+            @RequestParam("imageFile") MultipartFile imageFile) {
 
-    return service.uploadUserImage(userId, imageFile);
-}
+        return service.uploadUserImage(userId, imageFile);
+    }
 
- 
-
-
+    //subir .csv
+    @PostMapping("/upload-csv")
+    public ResponseEntity<String> uploadCsv(@RequestParam("csvFile") MultipartFile csvFile) {
+        try {
+            int totalAdded = service.processCsvFile(csvFile);
+            return ResponseEntity.ok("Total de registros añadidos: " + totalAdded);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error procesando el archivo CSV: " + e.getMessage());
+        }
+    }
 
 }
